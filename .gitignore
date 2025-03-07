@@ -1,4 +1,3 @@
 server.jar
-config/
-world/
+minecraft-data/
 .env

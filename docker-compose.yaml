@@ -2,11 +2,21 @@
   services:
     minecraft-server:
       build: .
-      user: "${USER_UID}:${USER_GID}"
       ports:
         - "25565:25565"
       volumes:
-        - ./config:/data/config
-        - ./world:/data/world
-      restart: on-failure
+        - ./minecraft-data:/data
+      networks:
+        - minecraft-network
+      restart: always
       container_name: minecraft-server-1.21.4
+    rcon:
+      image: outdead/rcon:latest
+      command: /bin/sh -c "tail -f README.md"
+      networks:
+        - minecraft-network
+      restart: always
+      container_name: rcon-minecraft
+  networks:
+    minecraft-network:
+      driver: bridge
