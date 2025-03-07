@@ -1,4 +1,4 @@
-FROM openjdk:17-slim
+FROM openjdk:24-slim
 ENV MINECRAFT_VERSION=1.21.4
 ENV EULA=TRUE
 WORKDIR /data
