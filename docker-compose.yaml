@@ -1,10 +1,12 @@
-version: '3.8'
-services:
-  minecraft-server:
-    build: .
-    ports:
-      - "25565:25565"
-    volumes:
-      - ./config:/data/config
-      - ./world:/data/world
-    restart: always
+  version: '3.8'
+  services:
+    minecraft-server:
+      build: .
+      user: "${USER_UID}:${USER_GID}"
+      ports:
+        - "25565:25565"
+      volumes:
+        - ./config:/data/config
+        - ./world:/data/world
+      restart: on-failure
+      container_name: minecraft-server-1.21.4
