@@ -1,4 +1,5 @@
 #!/bin/bash
+DIVIDER="============================================================"
 RCON_PASSWORD="1234"
 RCON_PORT="25575"
 SERVER_PORT="25565"
@@ -8,7 +9,9 @@ CONTAINER_NAME_RCON="rcon-minecraft"
 MC_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME_MC)
 
 function save_world {
-  echo "Saving the game (this may take a moment!)"
+  echo "$DIVIDER"
+  echo "                   Saving the Game"
+  echo "$DIVIDER"
   docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} save-all
   rc=$?
   if [ $rc -eq 0 ]; then
@@ -20,7 +23,9 @@ function save_world {
 }
 
 function restart_server {
-  echo "Stopping server..."
+  echo "$DIVIDER"
+  echo "                 Restarting Server"
+  echo "$DIVIDER"
   docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} stop
   rc_stop=$?
   if [ $rc_stop -ne 0 ]; then
@@ -43,7 +48,9 @@ function restart_server {
 }
 
 function stop_server {
-  echo "Stopping server..."
+  echo "$DIVIDER"
+  echo "                  Stopping Server"
+  echo "$DIVIDER"
   docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} stop
   rc_stop=$?
   if [ $rc_stop -ne 0 ]; then
@@ -64,7 +71,9 @@ function stop_server {
 }
 
 function start_server {
-  echo "Starting containers with docker-compose..."
+  echo "$DIVIDER"
+  echo "                  Starting Server"
+  echo "$DIVIDER"
   docker-compose up -d
   rc=$?
   if [ $rc -ne 0 ]; then
@@ -78,7 +87,9 @@ function start_server {
 }
 
 function rebuild_server {
-  echo "Removing world data and rebuilding containers..."
+  echo "$DIVIDER"
+  echo "                 Rebuilding Server"
+  echo "$DIVIDER"
   sudo rm -rf minecraft-data/world && docker-compose up --build -d
   rc=$?
   if [ $rc -ne 0 ]; then
@@ -95,14 +106,18 @@ function cron_on {
   SCRIPT_PATH=$(realpath "$0")
   CRON_JOB="*/15 * * * * ${SCRIPT_PATH} save"
   (crontab -l 2>/dev/null | grep -v -F "${SCRIPT_PATH} save"; echo "$CRON_JOB") | crontab -
-  echo "Cron job added for auto save every 15 minutes."
+  echo "$DIVIDER"
+  echo "          Cron job added for auto save every 15 minutes."
+  echo "$DIVIDER"
   echo ""
 }
 
 function cron_off {
   SCRIPT_PATH=$(realpath "$0")
   (crontab -l 2>/dev/null | grep -v -F "${SCRIPT_PATH} save") | crontab -
-  echo "Cron job for auto save removed."
+  echo "$DIVIDER"
+  echo "           Cron job for auto save removed."
+  echo "$DIVIDER"
   echo ""
 }
 
@@ -112,40 +127,66 @@ function send_command {
     exit 1
   fi
   CMD="$*"
-  echo "==================== Sending Command ===================="
+  echo "$DIVIDER"
+  echo "                 Sending Command"
+  echo "$DIVIDER"
   echo "Command: $CMD"
-  echo "---------------------------------------------------------"
   OUTPUT=$(docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} "$CMD")
   RC=$?
   if [ $RC -eq 0 ]; then
     echo "Command executed successfully."
-    echo "Output: $OUTPUT"
+    # Если команда не начинается с /say, показываем её вывод
+    if [[ "$CMD" != "/say"* ]]; then
+      echo "Output: $OUTPUT"
+    fi
   else
     echo "Error: Command execution failed with code $RC."
   fi
-  echo "========================================================="
+  echo "$DIVIDER"
   echo ""
 }
 
 function info {
-  echo "==================== Server Info ===================="
-  echo "Server IP: $MC_IP:$SERVER_PORT"
-  echo -n "Online Players: "
+  HOST_IP=$(hostname -I | awk '{print $1}')
+  echo "$DIVIDER"
+  echo "                   Server Info"
+  echo "$DIVIDER"
+  echo "Host IP: ${HOST_IP}:${SERVER_PORT}"
+  echo "Container IP: ${MC_IP}:${SERVER_PORT}"
   players_output=$(docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} list)
   players=$(echo "$players_output" | awk '{print $3}')
   if [ -z "$players" ]; then
-    echo "N/A (unable to retrieve)"
-  else
-    echo "$players"
+    players="N/A (unable to retrieve)"
   fi
-  echo -n "World Size: "
+  echo "Online Players: $players"
   world_size=$(du -sh ./minecraft-data/world 2>/dev/null | awk '{print $1}')
   if [ -z "$world_size" ]; then
-    echo "N/A"
-  else
-    echo "$world_size"
+    world_size="N/A"
   fi
-  echo "---------------- Cron Info ----------------"
+  echo "World Size: $world_size"
+  echo ""
+  
+  echo "$DIVIDER"
+  echo "                 Game Time Info"
+  echo "$DIVIDER"
+  GAME_DAY_OUTPUT=$(docker exec -i $CONTAINER_NAME_RCON ./rcon -a ${MC_IP}:${RCON_PORT} -p ${RCON_PASSWORD} "/time query day")
+  game_day=$(echo "$GAME_DAY_OUTPUT" | awk '{print $4}')
+  if [ -z "$game_day" ]; then
+    echo "Could not retrieve game day."
+  else
+    echo "Minecraft Day: $game_day"
+    real_time_minutes=$(( game_day * 20 ))
+    real_days=$(( real_time_minutes / 1440 ))
+    real_hours=$(( (real_time_minutes % 1440) / 60 ))
+    echo "Real Time: ${real_days} days, ${real_hours} hours"
+    # Отправляем в чат сервера информацию, не отображая вывод
+    send_command "/say Server running for ${real_days} days and ${real_hours} hours in real time (Game Day: $game_day)" > /dev/null 2>&1
+  fi
+  echo ""
+  
+  echo "$DIVIDER"
+  echo "                  Cron Info"
+  echo "$DIVIDER"
   SCRIPT_PATH=$(realpath "$0")
   cron_exists=$(crontab -l 2>/dev/null | grep -F "$SCRIPT_PATH" | grep -F "save")
   if [ -z "$cron_exists" ]; then
@@ -160,11 +201,14 @@ function info {
   else
     echo "Last Save: Never"
   fi
-  echo "====================================================="
+  echo "$DIVIDER"
   echo ""
 }
 
 function help {
+  echo "$DIVIDER"
+  echo "                 Help Information"
+  echo "$DIVIDER"
   echo "Usage: $0 {save|restart|stop|start|rebuild|cron_on|cron_off|info|command|help}"
   echo " save      - Save the game world"
   echo " restart   - Stop the server and restart containers"
@@ -173,9 +217,10 @@ function help {
   echo " rebuild   - Rebuild the server (remove world data)"
   echo " cron_on   - Enable auto-save cron job (every 15 minutes)"
   echo " cron_off  - Disable auto-save cron job"
-  echo " info      - Show server info and cron status, including last save time from logs"
+  echo " info      - Show server info and cron status, including game time info"
   echo " command   - Send an rcon command. Usage: $0 command \"rcon_command\""
   echo " help      - Show this help message"
+  echo "$DIVIDER"
   echo ""
 }
 
