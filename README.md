@@ -12,18 +12,33 @@ For start MINECRAFT in docker:
 ```./minecraft-server.sh save|restart|stop|start|rebuild|cron_on|cron_off|info|command|help```
 
 # Example of usage:
-```
+```bash
 nettyw@raspberrypi:~/minecraft-server-docker$ ./minecraft-server.sh info
-==================== Server Info ====================
-Server IP: 172.30.0.2:25565
-Online Players: 2
-World Size: 262M
----------------- Cron Info ----------------
+============================================================
+                   Server Info
+============================================================
+Host IP: 192.168.1.135:25565
+Container IP: 172.30.0.2:25565
+Online Players: 0
+World Size: 308M
+
+============================================================
+                 Game Time Info
+============================================================
+Minecraft Day: 295
+Real Time: 4 days, 2 hours
+
+============================================================
+                  Cron Info
+============================================================
 Cron job for auto save: Enabled.
-Last Save: 22:54:15
-====================================================
+Last Save: 16:30:01
+============================================================
 
 nettyw@raspberrypi:~/minecraft-server-docker$ ./minecraft-server.sh help
+============================================================
+                 Help Information
+============================================================
 Usage: ./minecraft-server.sh {save|restart|stop|start|rebuild|cron_on|cron_off|info|command|help}
  save      - Save the game world
  restart   - Stop the server and restart containers
@@ -32,7 +47,8 @@ Usage: ./minecraft-server.sh {save|restart|stop|start|rebuild|cron_on|cron_off|i
  rebuild   - Rebuild the server (remove world data)
  cron_on   - Enable auto-save cron job (every 15 minutes)
  cron_off  - Disable auto-save cron job
- info      - Show server info and cron status, including last save time from logs
+ info      - Show server info and cron status, including game time info
  command   - Send an rcon command. Usage: ./minecraft-server.sh command "rcon_command"
  help      - Show this help message
+============================================================
 ```

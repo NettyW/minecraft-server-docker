@@ -165,7 +165,6 @@ function info {
   fi
   echo "World Size: $world_size"
   echo ""
-  
   echo "$DIVIDER"
   echo "                 Game Time Info"
   echo "$DIVIDER"
@@ -183,7 +182,6 @@ function info {
     send_command "/say Server running for ${real_days} days and ${real_hours} hours in real time (Game Day: $game_day)" > /dev/null 2>&1
   fi
   echo ""
-  
   echo "$DIVIDER"
   echo "                  Cron Info"
   echo "$DIVIDER"
