@@ -1,4 +1,3 @@
-  version: '3.8'
   services:
     minecraft-server:
       build: .
@@ -9,7 +8,7 @@
       networks:
         - minecraft-network
       restart: always
-      container_name: minecraft-server-1.21.8
+      container_name: minecraft-server-1.21.9
     rcon:
       image: outdead/rcon:latest
       command: /bin/sh -c "tail -f README.md"

@@ -1,11 +1,11 @@
 FROM alpine:latest AS downloader
-ARG DOWNLOAD_SERVER_URL=https://piston-data.mojang.com/v1/objects/6bce4ef400e4efaa63a13d5e6f6b500be969ef81/server.jar
+ARG DOWNLOAD_SERVER_URL=https://piston-data.mojang.com/v1/objects/11e54c2081420a4d49db3007e66c80a22579ff2a/server.jar
 WORKDIR /tmp
 RUN apk add --no-cache wget \
     && wget -O minecraft_server.jar "${DOWNLOAD_SERVER_URL}"
 
 FROM openjdk:24-slim
-ARG MINECRAFT_VERSION=1.21.8
+ARG MINECRAFT_VERSION=1.21.9
 ARG EULA=TRUE
 ARG SERVER_PORT=25565
 ENV MINECRAFT_VERSION=${MINECRAFT_VERSION}
