@@ -3,7 +3,7 @@ DIVIDER="============================================================"
 RCON_PASSWORD="1234"
 RCON_PORT="25575"
 SERVER_PORT="25565"
-CONTAINER_NAME_MC="minecraft-server-1.21.9"
+CONTAINER_NAME_MC="minecraft-server-1.21.11"
 CONTAINER_NAME_RCON="rcon-minecraft"
 
 MC_IP=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $CONTAINER_NAME_MC)
