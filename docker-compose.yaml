@@ -8,7 +8,7 @@
       networks:
         - minecraft-network
       restart: always
-      container_name: minecraft-server-1.21.11
+      container_name: minecraft-server-1.20.4
     rcon:
       image: outdead/rcon:latest
       command: /bin/sh -c "tail -f README.md"
